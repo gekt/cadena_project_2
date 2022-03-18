@@ -50,22 +50,9 @@ export default () => {
 
             setHasWallet(true);
 
-            window.ethereum.on("accountsChanged", accounts => {
-                if (accounts.length === 0) {
-                    setAccount(null);
-                } else {
-                    setAccount(accounts[0]);
-                }
-            });
+            window.ethereum.on("accountsChanged", handleAccountChanged);
+            window.ethereum.on("chainChanged", handleNetworkChanged);
 
-            window.ethereum.on("chainChanged", chain => {
-                if (parseInt(chain) === 4){
-                    setBadNetwork(false);
-                    connectWallet();
-                }else{
-                    setBadNetwork(true);
-                }
-            })
 
             return () => {
                 _contract.removeAllListeners();
@@ -87,11 +74,12 @@ export default () => {
 
         if (_network.chainId === 4){
 
-            const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
-            setAccount(accounts[0]);
+            const _accounts = await window.ethereum.request({method: "eth_requestAccounts"});
 
-            if (accounts.length > 0) {
-                setAccount(accounts[0]);
+            setAccount(_accounts[0]);
+
+            if (_accounts.length > 0) {
+                setAccount(_accounts[0]);
             }
         }else{
             setBadNetwork(true);
@@ -111,8 +99,6 @@ export default () => {
             let _tokenSupply = await contract.current.totalSupply();
             let _userBalance = await contract.current.balanceOf(account);
             _tokenSupply = utils.formatEther(_tokenSupply);
-            console.log(_tokenName);
-
 
             setTokenName(_tokenName);
             setTokenSymbol(_tokenSymbol);
@@ -122,6 +108,8 @@ export default () => {
 
             if (account.toLowerCase() === _tokenOwner.toLowerCase()) {
                 setIsOwner(true);
+            }else{
+                setIsOwner(false);
             }
         } catch (e) {
             console.log(e)
@@ -158,6 +146,23 @@ export default () => {
             await contract.current.burn(utils.getAddress(account), utils.parseEther(burnAmount));
         }catch (e){
             console.log(e);
+        }
+    }
+
+    const handleAccountChanged = (accounts) => {
+        if (accounts.length === 0) {
+            setAccount(null);
+        } else {
+            connectWallet();
+        }
+    }
+
+    const handleNetworkChanged = (chain) => {
+        if (parseInt(chain) === 4){
+            setBadNetwork(false);
+            connectWallet();
+        }else{
+            setBadNetwork(true);
         }
     }
 
