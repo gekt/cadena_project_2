@@ -15,6 +15,7 @@ export default () => {
     const [account, setAccount] = useState(null);
     const [hasWallet, setHasWallet] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
+    const [badNetwork, setBadNetwork] = useState(false);
 
     const [tokenOwner, setTokenOwner] = useState(null);
     const [tokenSupply, setTokenSupply] = useState(0);
@@ -57,6 +58,15 @@ export default () => {
                 }
             });
 
+            window.ethereum.on("chainChanged", chain => {
+                if (parseInt(chain) === 4){
+                    setBadNetwork(false);
+                    connectWallet();
+                }else{
+                    setBadNetwork(true);
+                }
+            })
+
             return () => {
                 _contract.removeAllListeners();
                 _provider.removeAllListeners();
@@ -73,13 +83,20 @@ export default () => {
 
 
     const connectWallet = async () => {
-        const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
-        setAccount(accounts[0]);
+        let _network = await provider.current.getNetwork();
 
+        if (_network.chainId === 4){
 
-        if (accounts.length > 0) {
+            const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
             setAccount(accounts[0]);
+
+            if (accounts.length > 0) {
+                setAccount(accounts[0]);
+            }
+        }else{
+            setBadNetwork(true);
         }
+
     }
 
     const getTokenInfo = async () => {
@@ -149,8 +166,8 @@ export default () => {
         <>
             <CssBaseline/>
 
-            {account && hasWallet && tokenName && (<Paper elevation={3} sx={{
-                width: "80%",
+            {account && hasWallet && tokenName && !badNetwork && (<Paper elevation={3} sx={{
+                width: "60%",
                 margin: "20px auto",
                 bgcolor: "#2A2C3F",
                 textAlign: "center",
@@ -246,11 +263,15 @@ export default () => {
                 <p>You must have Metamask wallet !</p>
             )}
 
-            {!account && (
+            {!account && !badNetwork && (
                 <Paper  elevation={0} sx={{bgcolor:"transparent", display:"flex", textAlign:"center", flexWrap:"wrap", justifyContent:"center"}}>
                     <p>You must be connected</p>
                     <Button sx={{color:"white", borderColor:"orange"}} variant={"outlined"} onClick={connectWallet}>Connect</Button>
                 </Paper>
+            )}
+
+            {badNetwork && (
+                <p>You must be on the Rinkeby network !</p>
             )}
         </>
     )
