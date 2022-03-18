@@ -1,0 +1,19 @@
+body, html, #root {
+  background-color: #222336;
+}
+
+
+.sendToken{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  input{
+    color: white;
+  }
+}
+
+p{
+  width: 100%;
+  color: white;
+}
