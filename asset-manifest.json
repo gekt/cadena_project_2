@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/cadena_project_2/static/css/main.09b4ca11.css",
-    "main.js": "/cadena_project_2/static/js/main.1b97a176.js",
+    "main.js": "/cadena_project_2/static/js/main.a002757e.js",
     "index.html": "/cadena_project_2/index.html",
     "main.09b4ca11.css.map": "/cadena_project_2/static/css/main.09b4ca11.css.map",
-    "main.1b97a176.js.map": "/cadena_project_2/static/js/main.1b97a176.js.map"
+    "main.a002757e.js.map": "/cadena_project_2/static/js/main.a002757e.js.map"
   },
   "entrypoints": [
     "static/css/main.09b4ca11.css",
-    "static/js/main.1b97a176.js"
+    "static/js/main.a002757e.js"
   ]
 }
