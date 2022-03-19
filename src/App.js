@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {ethers, utils} from "ethers";
 import abi from "./contract/abi.json";
-import {Button, CssBaseline, Paper, TextField, Typography} from "@mui/material";
+import {Button, CircularProgress, CssBaseline, Paper, TextField, Typography} from "@mui/material";
 import "./App.scss";
 
 const contractAddress = "0xb23a7bd0397fa361b2a8649db9693e46c079b7c5";
@@ -16,6 +16,7 @@ export default () => {
     const [hasWallet, setHasWallet] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
     const [badNetwork, setBadNetwork] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [tokenOwner, setTokenOwner] = useState(null);
     const [tokenSupply, setTokenSupply] = useState(0);
@@ -66,33 +67,30 @@ export default () => {
         if (account) {
             getTokenInfo();
         }
-    }, [account])
+    }, [account]);
 
 
     const connectWallet = async () => {
         let _network = await provider.current.getNetwork();
 
         if (_network.chainId === 4){
+            try {
+                const _accounts = await window.ethereum.request({method: "eth_requestAccounts"});
 
-            const _accounts = await window.ethereum.request({method: "eth_requestAccounts"});
-
-            setAccount(_accounts[0]);
-
-            if (_accounts.length > 0) {
-                setAccount(_accounts[0]);
+                if (_accounts.length > 0) {
+                    setAccount(_accounts[0]);
+                }
+            } catch (e) {
+                console.log(e);
             }
         }else{
             setBadNetwork(true);
+            setLoading(false);
         }
-
     }
 
     const getTokenInfo = async () => {
-
-        console.log("trigger");
         try {
-            console.log(contract.current)
-
             let _tokenName = await contract.current.name();
             let _tokenSymbol = await contract.current.symbol();
             let _tokenOwner = await contract.current.owner();
@@ -111,6 +109,8 @@ export default () => {
             }else{
                 setIsOwner(false);
             }
+
+            setLoading(false);
         } catch (e) {
             console.log(e)
         }
@@ -150,20 +150,26 @@ export default () => {
     }
 
     const handleAccountChanged = (accounts) => {
+        setLoading(true);
         if (accounts.length === 0) {
             setAccount(null);
+            setLoading(false);
         } else {
             connectWallet();
         }
     }
 
     const handleNetworkChanged = (chain) => {
+        setLoading(true);
         if (parseInt(chain) === 4){
             setBadNetwork(false);
             connectWallet();
         }else{
             setBadNetwork(true);
+            setLoading(false);
+            setAccount(null);
         }
+
     }
 
 
@@ -278,6 +284,13 @@ export default () => {
             {badNetwork && (
                 <p>You must be on the Rinkeby network !</p>
             )}
+
+            { loading && (
+                <div className={"loadingContainer"}>
+                    <CircularProgress color={"primary"} />
+                </div>
+            )}
+
         </>
     )
 }
